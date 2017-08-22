@@ -1,0 +1,303 @@
+												
+void AVL::DeleteAVL(UserNode* Del)				
+{												
+	
+	UserNode* s = NameRoot;	//검색 노드
+	UserNode* pd;	//Del의 부모 노드
+	UserNode* pr;	//Replace 부모 노드
+	UserNode* r;	//Replace 노드
+
+	///////////이름 기준인 AVL리스트에서 노드 삭제////////////////////
+	
+	if(Del->GetpLeftName() == NULL && Del->GetpRightName() == NULL)			//Del의 하위노드가 없는 경우
+	{																		//Del을 찾으면서 경로에 있는 노드 저장
+		 
+		while(s != Del){				//Del노드 까지의 경로를 모두 탐색
+		
+		if(GetBalance_Name(s) == 0)		//균형 인수가 0인 노드
+			SU.ClearStack();			//삭제로 인하여 균형인수가 깨지지 않을 노드인 경우
+										//Stack을 비우고
+		SU.Push(s);						//s를 push
+	
+		if(strcmp(s->GetName(), Del->GetName()) == 1){				//s의 이름이 더 큰 경우
+			pd = s;													//부모노드 저장
+			s = s->GetpLeftName();									//s의 왼쪽 노드로 이동
+	
+		}
+		else if(strcmp(s->GetName(), Del->GetName()) == -1){		//s의 이름이 더 작은 경우
+			pd = s;													//부모노드 저장
+			s = s->GetpRightName();									//s의 오른쪽 노드로 이동
+		}else														//s와 이름이 같은 경우
+		{
+			if(strcmp(s->Getid(), Del->Getid()) == 1)				//s의 학번이 더 큰 경우
+			{
+				pd = s;												//부모노드 저장
+				s = s->GetpLeftName();								//왼쪽으로 이동
+			}else{													//s의 학번이 더 작은 경우
+				pd = s;												//부모노드 저장
+				s = s->GetpRightName();								//오른쪽으로 이동
+			}
+		}
+	}
+		if(pd->GetpLeftName() == Del)						//Del이 왼쪽 자식인 경우	
+			pd->SetpLeftName(NULL);							//왼쪽을 NULL로 저장
+		 else												//Del이 오른쪽 자식인 경우
+			pd->SetpRightName(NULL);						//오른쪽을 NULL로 저장
+
+	}else							//Del의 자식이 존재하는 경우
+	{
+
+		while(s != Del){											//Del노드 검색
+	
+		if(strcmp(s->GetName(), Del->GetName()) == 1){				//s의 이름이 더 큰 경우
+			pd = s;													//부모노드 저장
+			s = s->GetpLeftName();									//s의 왼쪽 노드로 이동
+	
+		}
+		else if(strcmp(s->GetName(), Del->GetName()) == -1){		//s의 이름이 더 작은 경우
+			pd = s;													//부모노드 저장
+			s = s->GetpRightName();									//s의 오른쪽 노드로 이동
+		}else														//s와 이름이 같은 경우
+		{
+			if(strcmp(s->Getid(), Del->Getid()) == 1)				//s의 학번이 더 큰 경우
+			{
+				pd = s;												//부모노드 저장
+				s = s->GetpLeftName();								//왼쪽 노드로 이동
+			}else{													//s의 학번이 더 작은 경우
+				pd = s;												//부모노드 저장
+				s = s->GetpRightName();								//오른쪽 노드로 이동
+			}
+		}
+	}
+
+	   if(Del->GetpLeftName())				//Del의 왼쪽 자식이 존재하는 경우
+	   {
+		    pr = Del;						//Replace의 부모 노드
+			r = Del->GetpLeftName();		//r = Replace
+			
+			SU.Push(r);						//스택에 저장
+
+			while(r->GetpRightName())		//replace 노드 검색
+			{
+				pr = r;						//pr = replace의 부모 노드
+				r = r->GetpRightName();		//왼쪽 서브트리에서 가장 큰 값을 찾아 저장
+
+				if(GetBalance_Name(r) == 0)	//밸런스가 0인 노드
+					SU.ClearStack();		//깨질 위험이 없으므로 지금 까지 저장한 /스택을 비움
+				
+				SU.Push(r);					//현재 노드를 스택에 저장
+			}
+
+		//삭제 연산
+		if(Del->GetpLeftName() != r)	//Replace가 Del의 바로 왼쪽 노드가 아닌 경우
+		{
+			pr->SetpRightName(r->GetpLeftName());	//Replace의 부모 노드에 Replace의 왼쪽 노드 연결
+			r->SetpLeftName(Del->GetpLeftName());	//Replace의 왼쪽 노드에 Del의 왼쪽 노드 연결
+		}
+
+		r->SetpRightName(Del->GetpRightName());		//Replace의 오른쪽에 Del의 오른쪽을 연결
+		
+
+		//Del의 부모와 삭제 후 재조정된 트리와 연결
+
+		if(pd->GetpLeftName() == Del)		//Del이 왼쪽 자식인 경우
+			pd->SetpLeftName(r);			//왼쪽 자식으로 연결
+		else								//Del이 오른쪽 자식인 경우
+			pd->SetpRightName(r);			//오른쪽 자식으로 연결
+	  
+	   }else								//Del의 오른쪽 자식만 존재하는 경우
+	   {
+		   pr = Del;						//Replace의 부모 포인터
+		   r = Del->GetpRightName();		//r는 오른쪽 서브트리의 가장 작은 값
+
+		   SU.Push(r);						//현재 r을 스택에 저장
+
+		   while(r->GetpLeftName()){		//가장 작은 값 찾기
+			   pr = r;						//Replace의 부모를 replace로 저장
+			   r = r->GetpLeftName();		//가장 작은 값을 찾아 이동
+			   	
+			   if(GetBalance_Name(r) == 0)	//밸런스가 0인 노드
+					SU.ClearStack();		//스택을 비움
+		
+				SU.Push(r);					//깨질 위험이 있는 노드는 스택에 저장
+		   }
+
+		if(Del->GetpRightName() != r){				//Replace가 바로 오른쪽 노드가 아닌 경우
+			pr->SetpLeftName(r->GetpRightName());	//Replace의 부모와 Replace의 오른쪽 노드를 연결
+			r->SetpRightName(Del->GetpRightName());	//Replace의 오른쪽 노드를 Del의 오른쪽 노드로 연결
+		}
+
+		r->SetpLeftName(Del->GetpLeftName());	//Replace의 왼쪽 노드를 Del의 왼쪽 노드로 연결
+		
+		if(pd->GetpLeftName() == Del)				//Del이 왼쪽 자식인 경우
+			pd->SetpLeftName(r);					//Replace를 왼쪽에 연결
+		else										//Del이 오른쪽 자식인 경우
+			pd->SetpRightName(r);					//Replace를 오른쪽에 연결
+	   }
+	}
+
+
+	///스택에 저장 되어있던 노드(삭제 연산 중 지나온 경로를 저장한 노드)균형 인수 재조정
+
+	while(!SU.isEmpty()){						//스택이 빌때 까지 반복
+		s = SU.Pop();							//스택에 저장 되있던 노드 pop
+	
+		if(GetBalance_Name(s) > 1)				//균형이 무너진 경우(LL or LR rotation)
+		{
+			UserNode* sL = s->GetpLeftName();	//LL 과 LR을 판별 하기 위해 균형이 무너진 노드의 왼쪽 노드
+
+			if(GetBalance_Name(sL) > 0)			//LL rotation인 경우
+				LL_NameRotation(s);				//LL rotation
+			else								//LR rotation인 경우
+				LR_NameRotation(s);				//LR rotation
+		}
+	
+		if(GetBalance_Name(s) < -1)				//균형이 무너진 경우(RR or RL rotation)
+		{
+			UserNode* sR = s->GetpRightName();	//RR과 RL을 판별하기 위해 균형이 무너진 노드의 오른쪽 노드
+
+			if(GetBalance_Name(sR) < 0)			//RR rotation인 경우
+				RR_NameRotation(s);				//RR rotation
+			else								//RL rotation인 경우
+				RL_NameRotation(s);				//RL rotation
+		}
+	}
+
+	/////////학번 기준 AVL에서의 삭제
+	s = idRoot;									//학번을 검색하기 위해 idRoot로 저장
+	
+	if(Del->GetpLeftid() == NULL && Del->GetpRightid() == NULL)		//Del의 하위노드가 없는 경우
+	{																//Del을 찾으면서 경로에 있는 노드 저장
+		 
+		while(s != Del){								//Del 노드를 찾을 때 까지 반복
+		
+		if(GetBalance_id(s) == 0)						//균형 인수가 0인 노드 발견한 경우
+			SU.ClearStack();							//삭제로 인하여 균형인수가 깨지지 않을 노드인 경우
+														//지금 까지 저장 되어 있던 Stack을 비우고
+		SU.Push(s);										//현재 노드 s를 push
+	
+		if(strcmp(s->Getid(), Del->Getid()) == 1){				//s의 학번이 더 큰 경우
+			pd = s;												//Del의 부모 노드 저장
+			s = s->GetpLeftid();								//s의 왼쪽 노드로 이동
+	
+		}
+		else if(strcmp(s->Getid(), Del->Getid()) == -1){		//s의 학번이 더 작은 경우
+			pd = s;												//Del의 부모 노드 저장
+			s = s->GetpRightid();								//s의 오른쪽 노드로 이동
+		}													
+	}
+		if(pd->GetpLeftid() == Del)								//Del의 왼쪽 자식인 경우
+			pd->SetpLeftid(NULL);								//Del 부모의 왼쪽을 NULL로 저장
+		 else													//Del의 오른쪽 자식인 경우
+			pd->SetpRightid(NULL);								//Del 부모의 오른쪽을 NULL로 저장
+	}else									//Del의 자식이 존재하는 경우
+	{
+		while(s != Del){					//Del노드 검색
+	
+		if(strcmp(s->Getid(), Del->Getid()) == 1){			//s의 학번이 더 큰 경우
+			pd = s;											//Del의 부모 노드 저장
+			s = s->GetpLeftid();							//s의 왼쪽 노드로 이동
+	
+		}
+		else if(strcmp(s->Getid(), Del->Getid()) == -1){		//s의 학번이 더 작은 경우
+			pd = s;												//Del의 부모 노드 저장
+			s = s->GetpRightid();								//s의 오른쪽 노드로 이동
+		}
+	}
+
+	   if(Del->GetpLeftid())			//Del의 왼쪽 자식이 존재하는 경우
+	   {
+		    pr = Del;					//Replace의 부모 노드 저장
+			r = Del->GetpLeftid();		//r = replace
+			
+			SU.Push(r);					//현재 노드 r을 스택에 저장
+
+			while(r->GetpRightid())		//replace 노드 검색
+			{
+				pr = r;						//pr = replace의 부모 노드
+				r = r->GetpRightid();		//r을 오른쪽 노드로 이동
+
+				if(GetBalance_id(r) == 0)	//밸런스가 0인 노드를 발견한 경우
+					SU.ClearStack();		//스택을 비움
+				
+				SU.Push(r);					//현재 노드를 스택에 저장
+			}
+
+		//삭제 연산
+		if(Del->GetpLeftid() != r)				//Replace가 Del의 바로 왼쪽 노드가 아닌 경우
+		{
+			pr->SetpRightid(r->GetpLeftid());	//Replace의 부모 노드와 Replace의 왼쪽 노드를 연결
+			r->SetpLeftid(Del->GetpLeftid());	//Replace의 왼쪽 노드를 Del의 왼쪽 노드와 연결
+		}
+
+		r->SetpRightid(Del->GetpRightid());		//Replace의 오른쪽 노드를 Del의 오른쪽 노드와 연결
+		
+
+		//Del의 부모와 삭제 후 재조정된 트리와 연결
+		if(pd->GetpLeftid() == Del)					//Del이 왼쪽 자식인 경우
+			pd->SetpLeftid(r);						//왼쪽 자식으로 Replace를 저장
+		else										//Del이 오른쪽 자식인 경우
+			pd->SetpRightid(r);						//오른쪽 자식으로 Replace를 저장
+	  
+	   }else										//Del의 오른쪽 자식만 존재하는 경우
+	   {
+		   pr = Del;								//Replace의 부모 노드 저장
+		   r = Del->GetpRightid();					//Replace는 오른쪽 서브트리에서 가장 작은 값
+
+		   SU.Push(r);								//현재 노드 r 스택에 저장
+
+		   while(r->GetpLeftid()){					//가장 작은 값을 찾을 때 까지 검색
+			   pr = r;								//r의 부모노드를 저장
+			   r = r->GetpRightid();				//r을 오른쪽 서브트리의 루트로 저장
+			   	
+			   if(GetBalance_id(r) == 0)			//밸런스가 0인 노드
+					SU.ClearStack();				//스택을 비움
+		
+				SU.Push(r);							//깨질 위험이 있는 노드는스택에 저장
+		   }
+
+		if(Del->GetpRightid() != r){				//Replace가 바로 오른쪽 노드가 아닌 경우
+			pr->SetpLeftid(r->GetpRightid());		//Replace 부모의 왼쪽 노드를 Replace의 오른쪽 노드와 연결
+			r->SetpRightid(Del->GetpRightid());			//Replace의 오른쪽 노드를 Del의 오른쪽 노드로 연결
+		}
+		r->SetpLeftid(Del->GetpLeftid());		//Replace의 왼쪽 노드를 Del의 왼쪽 노드로 연결
+		
+		if(pd->GetpLeftid() == Del)					//Del이 왼쪽 자식인 경우
+			pd->SetpLeftid(r);						//왼쪽 자식으로 Replace 저장
+		else										//Del이 오른쪽 자식인 경우
+			pd->SetpRightid(r);						//오른쪽 자식으로 Replace 저장
+	   }
+	}
+
+
+	///스택에 저장 되어있던 노드(삭제 연산 중 지나온 경로를 저장한 노드)균형 인수 재조정
+
+	while(!SU.isEmpty()){
+		s = SU.Pop();							//스택에서 노드 pop
+	
+		if(GetBalance_id(s) > 1)				//균형인수가 깨진 노드를 발견한 경우(LL or LR rotation)
+		{
+			UserNode* sL = s->GetpLeftid();		//LL or LR을 구분하기 위해 s의 왼쪽 노드로 저장
+
+			if(GetBalance_id(sL) > 0)			//LL rotation인 경우
+				LL_idRotation(s);				//LL rotation
+			else								//LR rotation인 경우
+				LR_idRotation(s);				//LR rotation
+		}
+	
+		if(GetBalance_id(s) < -1)				//균형인수가 깨진 노드를 발견한 경우(RR or RL rotation)
+		{
+			UserNode* sR = s->GetpRightid();	//RR or RL을 구분하기 위해 s의 오른쪽 노드로 저장
+
+			if(GetBalance_id(sR) < 0)			//RR rotation인 경우
+				RR_idRotation(s);				//RR rotation
+			else								//RL rotation인 경우
+				RL_idRotation(s);				//RL rotation
+		}
+	}
+
+	Del->SetcheckMember(1);						//탈퇴 신청한 회원을 탈퇴 표시
+	Del->SetpRightName(NULL);					//UserNode* pRightName을 1차원 링크드 리스트에서 관리하기 위한 포인터로 설정함
+	OL.Insert(Del);								//1차원 링크드 리스트로 이동
+	return ;									//함수 종료
+}

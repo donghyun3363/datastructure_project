@@ -1,0 +1,11 @@
+LOAD input_parcel.txt
+PRINT
+FIND 060
+FIND 005
+UPDATE update_parcel_1.txt
+FIND 117
+PRINT
+SAVE save_parcel.txt
+LOAD save_parcel.txt
+PRINT
+EXIT
